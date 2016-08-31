@@ -1,0 +1,86 @@
+Восстановление работоспособности ПО:
+
+1. Проверил конфиги виртуальных хостов Apache и увидел что Servername был только на www.correct.candidatest.top, изменил на correct.candidatest.top и добавл ServerAlias с www. Исправил права на папки /home/ftpaccess/correct.candidatest.top и /home/ftpaccess/correct.candidatest.top/www на 755. Добавил в apache2.conf в директорию /home/ праметр DirectoryIndex index.php index.html, для того чтоб Апач сначала открывал index.php и только если его нет index.html.
+
+2. В базе пользователей в файле virtual была ошибка в домене юзера test, исправил и обновил файл virtual.db коммандой postmap /etc/postfix/virtual. После этого добавил IP с которого подключаюсь к серверу в параметр mynetworks файла main.cf, для того чтоб smtp разрешило relay почты на другой домен, отличный от локального candidatest.top. Исходный текст письма:
+
+Delivered-To: lotrik@mail.ru
+Return-path: <>
+Authentication-Results: mxs.mail.ru; spf=none () smtp.mailfrom=test@candidatest.top smtp.helo=candidatest.top
+Received-SPF: none
+Received: from [78.140.143.49] (port=53236 helo=candidatest.top)
+	by mx73.mail.ru with esmtp (envelope-from <test@candidatest.top>)
+	id 1bf7Tt-0001Qb-Iv
+	for lotrik@mail.ru; Wed, 31 Aug 2016 18:31:14 +0300
+X-Mru-BL: 0:0
+X-Mru-BadRcptsCount: 0
+X-Mru-PTR: error
+X-Mru-NR: 1
+X-Mru-RC: NL
+Message-Id: <1472657472.1449976266@mx73.mail.ru>
+From: test@candidatest.top
+Received: from test (unknown [91.215.55.32])
+	by candidatest.top (Postfix) with ESMTP id 878751A0B6C
+	for <lotrik@mail.ru>; Wed, 31 Aug 2016 17:30:52 +0200 (CEST)
+X-DMARC-Policy: no
+X-Mras: OK
+X-Mru-Authenticated-Sender: test@candidatest.top
+X-Spam: undefined
+
+Hello!
+
+Работа с DNS
+
+1. $ host -t PTR 74.125.136.109
+109.136.125.74.in-addr.arpa domain name pointer ea-in-f109.1e100.net.
+
+2. $ host -t MX ibee.in
+ibee.in mail is handled by 30 aspmx4.googlemail.com.
+ibee.in mail is handled by 10 aspmx.l.google.com.
+ibee.in mail is handled by 30 aspmx3.googlemail.com.
+ibee.in mail is handled by 20 alt2.aspmx.l.google.com.
+ibee.in mail is handled by 20 alt1.aspmx.l.google.com.
+ibee.in mail is handled by 30 aspmx5.googlemail.com.
+ibee.in mail is handled by 30 aspmx2.googlemail.com.
+
+3.$ dig @213.180.193.1 ya.ru
+
+; <<>> DiG 9.9.5-3ubuntu0.8-Ubuntu <<>> @213.180.193.1 ya.ru
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 41321
+;; flags: qr aa rd; QUERY: 1, ANSWER: 3, AUTHORITY: 2, ADDITIONAL: 5
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;ya.ru.				IN	A
+
+;; ANSWER SECTION:
+ya.ru.			7200	IN	A	213.180.193.3
+ya.ru.			7200	IN	A	93.158.134.3
+ya.ru.			7200	IN	A	213.180.204.3
+
+;; AUTHORITY SECTION:
+ya.ru.			7200	IN	NS	ns2.yandex.ru.
+ya.ru.			7200	IN	NS	ns1.yandex.ru.
+
+;; ADDITIONAL SECTION:
+ns1.yandex.ru.		345600	IN	A	213.180.193.1
+ns2.yandex.ru.		345600	IN	A	93.158.134.1
+ns1.yandex.ru.		3600	IN	AAAA	2a02:6b8::1
+ns2.yandex.ru.		3600	IN	AAAA	2a02:6b8:0:1::1
+
+;; Query time: 28 msec
+;; SERVER: 213.180.193.1#53(213.180.193.1)
+;; WHEN: Wed Aug 31 18:46:37 EEST 2016
+;; MSG SIZE  rcvd: 213
+
+4. whois vk.com
+
+Name Server: NS1.VKONTAKTE.RU
+Name Server: NS2.VKONTAKTE.RU
+Name Server: NS3.VKONTAKTE.RU
+Name Server: NS4.VKONTAKTE.RU
