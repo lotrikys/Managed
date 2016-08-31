@@ -1,6 +1,6 @@
 Восстановление работоспособности ПО:
 
-1. Проверил конфиги виртуальных хостов Apache и увидел что Servername был только на www.correct.candidatest.top, изменил на correct.candidatest.top и добавл ServerAlias с www. Исправил права на папки /home/ftpaccess/correct.candidatest.top и /home/ftpaccess/correct.candidatest.top/www на 755. Добавил в apache2.conf в директорию /home/ праметр DirectoryIndex index.php index.html, для того чтоб Апач сначала открывал index.php и только если его нет index.html.
+1. Проверил конфиги виртуальных хостов Apache и увидел что Servername был только на www.correct.candidatest.top, изменил на correct.candidatest.top и добавл ServerAlias с www. Исправил права на папки /home/ftpaccess/correct.candidatest.top и /home/ftpaccess/correct.candidatest.top/www на 755. Добавил в apache2.conf в директорию /home/ праметр DirectoryIndex index.php index.html, для того чтоб Апач сначала открывал index.php и только если его нет index.html. В конфигурационном файле виртуального хоста correct.candidtest.top nginx поставил ; после include proxy.conf.
 
 2. В базе пользователей в файле virtual была ошибка в домене юзера test, исправил и обновил файл virtual.db коммандой postmap /etc/postfix/virtual. После этого добавил IP с которого подключаюсь к серверу в параметр mynetworks файла main.cf, для того чтоб smtp разрешило relay почты на другой домен, отличный от локального candidatest.top. Исходный текст письма:
 
