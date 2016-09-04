@@ -20,7 +20,6 @@
     - mariadb-devel
     - python-devel
     - python-pip
-    - git
 
   - name: Install Mysql-python
     pip: name=mysql-python
