@@ -1,0 +1,88 @@
+---
+- hosts: managed
+  vars:
+    mysql_root_password: ytq1ZsB2RaL41kJOS
+    line_for_ftp: "in.proftpd : 10.1.0.0/255.255.255.0 : allow"
+  tasks:
+  - name: Install php repo
+    yum: name=https://mirror.webtatic.com/yum/el7/webtatic-release.rpm state=present
+  - name: Install Software
+    yum: name={{ item }} state=latest
+    with_items:
+    - epel-release
+    - proftpd
+    - httpd
+    - mod_geoip
+    - nginx
+    - php56w
+    - php56w-gd
+    - mariadb-server
+    - mariadb-devel
+    - python-devel
+    - python-pip
+    - git
+
+  - name: Install Mysql-python
+    pip: name=mysql-python
+
+  - name: Install configs for Apache and Nginx
+    copy: src=/usr/local/src/managed_ansible/{{ item.src }} dest={{ item.dst }}
+    with_items:
+    - { src: 'apache/block.conf', dst: '/etc/httpd/conf/block.conf' }
+    - { src: 'apache/httpd.conf', dst: '/etc/httpd/conf/httpd.conf' }
+    - { src: 'apache/vhost.conf', dst: '/etc/httpd/conf/vhost.conf' }
+    - { src: 'remoteip/remoteip.conf', dst: '/etc/httpd/conf.d/remoteip.conf' }
+    - { src: 'nginx/block.conf', dst: '/etc/nginx/block.conf' }
+    - { src: 'nginx/nginx.conf', dst: '/etc/nginx/nginx.conf' }
+    - { src: 'nginx/proxy.conf', dst: '/etc/nginx/proxy.conf' }
+    - { src: 'nginx/vhost.conf', dst: '/etc/nginx/vhost.conf' }
+    - { src: 'mysql/my.cnf', dst: '/etc/my.cnf' }
+
+  - name: Fill file .my.cnf
+    copy: content="[client]\nuser=root\npassword={{ mysql_root_password }}" dest=/root/.my.cnf
+
+  - name: Adding user candidatest
+    user: name=candidatest shell=/bin/bash
+
+  - name: Change mode of /home/candidatest to 755
+    file: path=/home/candidatest mode=0755
+
+  - name: Adding folder 50.candidatest.top
+    file: path=/home/candidatest/50.candidatest.top/www state=directory mode=0755
+
+  - name: Starting Proftpd and adding to autorun
+    service: name={{ item }} state=started enabled=yes
+    with_items:
+    - proftpd
+    - httpd
+    - nginx
+    - mariadb
+
+  - name: Change root user password on first run
+    mysql_user: login_user=root
+        login_password=''
+        name=root
+        password={{ mysql_root_password }}
+        priv=*.*:ALL,GRANT
+        host={{ item }}
+    with_items:
+    - 127.0.0.1
+    - localhost
+
+  - name: Create database candidatest_wp
+    mysql_db: name=candidatest_wp state=present
+  - name: Create user for candidatest_wp
+    mysql_user: name=candidatest_wp password=nZ4GhCoSEtEW6Y5PX priv=candidatest_wp.*:ALL state=present host={{ item }}
+    with_items:
+    - 127.0.0.1
+    - localhost
+    - 10.1.0.2
+
+  - name: Fill file info_about_php.php
+    copy: content="<?php\nphpinfo();\n?>" dest=/home/candidatest/50.candidatest.top/www/info_about_php.php
+
+  - name: Allow ftp from 10.1.0.0/24
+    lineinfile: dest=/etc/hosts.allow line="{{ line_for_ftp }}"
+
+  - name: Disabling SElinux
+    selinux: state=disabled
